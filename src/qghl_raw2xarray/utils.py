@@ -107,8 +107,6 @@ def set_time_coords(ds, start_time=None, **kwargs):
     # set time attributes
     if "time_attrs" in kwargs:
         ds.time.attrs = kwargs["time_attrs"]
-    elif start_time is None:
-        ds.time.attrs = set_time_attrs("Relative to start time of experiment")
     # set time_utc coordinates
     if "time_utc_diff" in kwargs:
         ds = ds.assign_coords(
