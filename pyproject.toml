@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qghl_raw2xarray"
+version = "0.0.1"
+authors = [
+  { name="Renan Silva", email="renan.silva@uwa.edu.au"},
+]
+description = "Read QGHL reef raw files and convert to xarray datasets"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "dolfyn",
+  "numpy",
+  "matplotlib",
+  "mikeio",
+  "pandas",
+  "xarray",  
+]
