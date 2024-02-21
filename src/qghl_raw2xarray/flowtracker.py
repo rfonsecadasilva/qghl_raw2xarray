@@ -9,13 +9,13 @@ import xarray as xr
 from qghl_raw2xarray.utils import set_station_coords, set_time_coords
 
 
-def calculate_ds_ft(ftfile, ftpath, start_time=None, **kwargs):
+def calculate_ds_ft(ftfile, ftpath='./', start_time=None, **kwargs):
     """
     Calculate the Xarray dataset for Flowtracker ADV and pressure sensor data.
 
     Parameters:
     ftfile (str): The name of the Flowtracker csv file.
-    ftpath (str): Path to the directory containing the Flowtracker data file.
+    ftpath (str, optional): The path to the directory containing the Flowtracker data file.
     start_time (numpy.datetime64, optional): The start time of the experiment. Defaults to None.
     **kwargs: Additional keyword arguments.
 
@@ -62,18 +62,18 @@ def ftcsv2ds(ftfile, ftpath):
     def str_to_nptime(x):
         return datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')
     try:
-        csvfile = open(f"{ftpath}{ftfile}.csv", "r",
+        csvfile = open(f"{ftpath}{ftfile}", "r",
                        encoding="utf-8").readlines()
     except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"The specified file {ftpath}{ftfile}.csv was not found.") from e
+            f"The specified file {ftpath}{ftfile} was not found.") from e
     print("Reading Flowtracker csv file", ftfile)
     try:
-        cfgfile = open(f"{ftpath}{ftfile}.labadv_config",
+        cfgfile = open(f"{ftpath}{ftfile[:-4]}.labadv_config",
                        "r", encoding="utf-8").read()
     except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"The specified file {ftpath}{ftfile}.labadv_config was not found.") from e
+            f"The specified file {ftpath}{ftfile[:-4]}.labadv_config was not found.") from e
     nbeams = len(
         [i for i in csvfile[0].strip().split(",") if "Correlation" in i])
     utc_time = np.array([str_to_nptime(i.strip().split(",")[1])
