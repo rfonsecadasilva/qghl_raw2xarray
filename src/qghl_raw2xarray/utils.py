@@ -38,8 +38,13 @@ def time_offset(ds, start_time=None):
     """
     if start_time is None:
         start_time = ds.time[0].values
-        ds = ds.assign_coords(
-            {"time_offset": ("time", (ds.time.values-start_time).astype(float))})
+        if isinstance(start_time, np.datetime64):
+            ds = ds.assign_coords(
+                {"time_offset": ("time", (ds.time.values-start_time).astype(float)/1e9)})
+        else:
+            # assuming in seconds
+            ds = ds.assign_coords(
+                {"time_offset": ("time", (ds.time.values-start_time).astype(float))})
         ds.time_offset.attrs = set_time_attrs(
             "Relative to first time value of experiment")
     else:
