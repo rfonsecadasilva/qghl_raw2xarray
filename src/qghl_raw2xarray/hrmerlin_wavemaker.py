@@ -10,13 +10,14 @@ import xarray as xr
 from qghl_raw2xarray.utils import set_paddle_coords, set_time_coords
 
 
-def calculate_ds_wm(xmlfile, xmlfilepath, tmin=None, start_time=None, **kwargs):
+def calculate_ds_wm(xmlfile, xmlfilepath='./', tmin=None, start_time=None, **kwargs):
     """
     Reads HR Merlin wave maker binary file and returns xarray dataset.
 
     Parameters:
     xmlfile (str): The name of the HR Merlin xml file.
-    xmlfilepath (str): The path to the directory containing the xml file and binary files.
+    xmlfilepath (str, optional): The path to the directory containing the xml file and binary files.
+    Defaults to './'.
     tmin (numpy.datetime64, optional): The start time of time series. Defaults to None.
     start_time (numpy.datetime64, optional): The start time of the experiment. Defaults to None.
     **kwargs: Additional keyword arguments for setting attributes and coordinates.
