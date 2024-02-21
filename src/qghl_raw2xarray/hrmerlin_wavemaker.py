@@ -60,10 +60,13 @@ def calculate_ds_wm(xmlfile, xmlfilepath='./', tmin=None, start_time=None, **kwa
                                      "units": list_units[d]}) for d in range(chans)}
     # time axis in seconds from start of experiment
     time_axis = np.arange(0, pnts/rate, 1/rate)
-    if tmin is not None:
-        # convert time axis to datetime64 from tmin
-        time_axis = np.array(
-            [tmin + np.timedelta64(int(i * 1e9), 'ns') for i in time_axis])
+    if tmin is None:
+        date_string = get_xml_value(xml_root, "TestCompleteTime")
+        date = datetime.datetime.strptime(date_string, '%A, %d %B %Y %I:%M:%S %p').isoformat()
+        tmin = np.datetime64(date, 'ns')
+    # convert time axis to datetime64 from tmin
+    time_axis = np.array(
+        [tmin + np.timedelta64(int(i * 1e9), 'ns') for i in time_axis])
     coords = {"time": time_axis}
     # create xarray dataset
     ds = xr.Dataset(data_vars=data_vars,
