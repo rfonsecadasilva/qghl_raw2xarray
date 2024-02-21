@@ -9,13 +9,13 @@ import xarray as xr
 from qghl_raw2xarray.utils import set_station_coords, set_time_coords
 
 
-def calculate_ds_cwg(cwgfile, cwgpath, tmin=None, start_time=None, wg_dt=0.01, **kwargs):
+def calculate_ds_cwg(cwgfile, cwgpath='./', tmin=None, start_time=None, wg_dt=0.01, **kwargs):
     """
     Calculate an xarray Dataset from a capacitance wave gauge file.
 
     Parameters:
     cwgfile (str): The name of the capacitance wave gauge file.
-    cwgpath (str): The path to the capacitance wave gauge file.
+    cwgpath (str, optional): The path to the capacitance wave gauge file. Defaults to './'.
     tmin (numpy.datetime64, optional): The start time of time series. Defaults to None.
     start_time (numpy.datetime64, optional): The start time of the experiment. Defaults to None.
     wg_dt (float, optional): The time step of the wave gauge data. Defaults to 0.01.
@@ -69,13 +69,13 @@ def calculate_ds_cwg(cwgfile, cwgpath, tmin=None, start_time=None, wg_dt=0.01, *
     return ds
 
 
-def calculate_ds_rwg(rwgfile, rwgpath, tmin=None, start_time=None, **kwargs):
+def calculate_ds_rwg(rwgfile, rwgpath='./', tmin=None, start_time=None, **kwargs):
     """
     Calculate xarray dataset from resistance wave gauge data.
 
     Parameters:
     rwgfile (str): The name of the resistance wave gauge file.
-    rwgpath (str): The path to the resistance wave gauge file.
+    rawpath (str, optional): The path to the resistance wave gauge file. Defaults to './'.
     tmin (numpy.datetime64, optional): The start time of time series. Defaults to None.
     start_time (numpy.datetime64, optional): The start time of the experiment. Defaults to None.
     **kwargs: Additional keyword arguments for setting coordinates and attributes.
