@@ -23,29 +23,29 @@ pip install -e .
 ### Example of usage - to create a xarray dataset from HR Merlin binary wave maker files
 ```
 from qghl_raw2xarray import hrmerlin_wavemaker as hrm
-ds_wm=hrm.calculate_ds_wm(xmlfile='T001.xml', xmlfilepath='HR_Merlin/')
+ds_wm=hrm.calculate_ds_wm(xmlfile='T001.xml')
 ```
 
 ### Example of usage - to create a xarray dataset from HR Wallingford capacitance csv wave gauge files
 ```
 from qghl_raw2xarray import wave_gauges as wg
-ds_cwg=wg.calculate_ds_cwg(cwgfile='T001.csv', cwgpath='HR_DAQ/')
+ds_cwg=wg.calculate_ds_cwg(cwgfile='T001_cwg.csv')
 ```
 
 ### Example of usage - to create a xarray dataset from DHI resistance dfs0 wave gauge files
 ```
 from qghl_raw2xarray import wave_gauges as wg
-ds_rwg=wg.calculate_ds_rwg(rwgfile='T001.dfs0', rwgpath='DHI_WG/')
+ds_rwg=wg.calculate_ds_rwg(rwgfile='T001.dfs0')
 ```
 
 ### Example of usage - to create a xarray dataset from Vectrino ADV binary vno files
 ```
 from qghl_raw2xarray import vectrino as vec
-vec.calculate_ds_vec(vecfile='T001.vno', vecpath='Vectrino/')
+vec.calculate_ds_vec(vecfile='T001.vno')
 ```
 
 ### Example of usage - to create a xarray dataset from Flowtracker ADV and pressure sensor csv files 
 ```
 from qghl_raw2xarray import flowtracker as ft
-ft.calculate_ds_ft(ftfile='20231106-131244.csv', ftpath='Flowtracker/')
+ft.calculate_ds_ft(ftfile='T001_ft.csv')
 ```
