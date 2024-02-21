@@ -10,13 +10,13 @@ import xarray as xr
 from qghl_raw2xarray.utils import set_station_coords, set_time_coords
 
 
-def calculate_ds_vec(vecfile, vecpath, tmin=None, start_time=None, **kwargs):
+def calculate_ds_vec(vecfile, vecpath='./', tmin=None, start_time=None, **kwargs):
     """
     Calculate the xarray dataset from Vectrino point ADV data.
 
     Parameters:
     vecfile (str): Name of Vectrino data file.
-    vecpath (str): Path to the directory containing
+    vecpath (str, optional): Path to the directory containing
     the Vectrino data file.
     tmin (numpy.datetime64, optional): The start time of time series. Defaults to None.
     start_time (numpy.datetime64, optional): The start time of the experiment. Defaults to None.
