@@ -99,9 +99,11 @@ def calculate_ds_rwg(rwgfile, rwgpath='./', tmin=None, start_time=None, **kwargs
                             "long_name": "Water level",
                              "units": "m"})}
     time_axis = rwgts.time.values
-    if tmin is not None:
-        # convert time axis to datetime64 from tmin
-        time_axis = tmin + (time_axis - time_axis[0])
+    if tmin is None:
+        # calculate tmin from XML file
+        tmin = calculate_tmin_rwgxml(rwgfile, rwgpath)
+    # convert time axis to datetime64 from tmin
+    time_axis = tmin + (time_axis - time_axis[0])
     coords = {"time": time_axis}
     # create xarray
     ds = xr.Dataset(data_vars=data_vars,
@@ -122,3 +124,30 @@ def calculate_ds_rwg(rwgfile, rwgpath='./', tmin=None, start_time=None, **kwargs
     ds.attrs["Xarray dataset date"] = str(
         np.datetime64(datetime.datetime.now().isoformat()))
     return ds
+
+def calculate_tmin_rwgxml(rwgfile, rwgpath):
+    """
+    Calculate the start time of the resistance wave gauge data from the XML file.
+
+    Parameters:
+    rwgfile (str): The name of the resistance wave gauge file.
+    rwgpath (str): The path to the resistance wave gauge file.
+
+    Returns:
+    numpy.datetime64: The start time of the resistance wave gauge data.
+
+    Raises:
+    FileNotFoundError: If the specified file is not found.
+    """
+    try:
+        xml_file = open(f"{rwgpath}{rwgfile[:-5]}.xml", "r", encoding="utf-8").read()
+    except FileNotFoundError as e:
+        raise FileNotFoundError(
+            f"The specified file {rwgpath+rwgfile[:-5]}.xml was not found.") from e
+    rwg_tmax_str = xml_file.split("<date>")[1].split("</date>")[0]
+    rwg_tmax = np.datetime64(rwg_tmax_str)
+    rwg_tmax += np.timedelta64(int(rwg_tmax_str[-5:-3]), 'h') + \
+        np.timedelta64(int(rwg_tmax_str[-2:]), 'm')
+    rwg_dur = float(xml_file.split("<DurationSeconds>")[1]
+                    .split("</DurationSeconds>")[0])
+    return rwg_tmax + np.timedelta64(int(-rwg_dur * 1e9), 'ns')
