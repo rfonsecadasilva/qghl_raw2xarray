@@ -23,7 +23,7 @@ pip install -e .
 ### Example of usage - to create a xarray dataset from HR Merlin binary wave maker files
 ```
 from qghl_raw2xarray import hrmerlin_wavemaker as hrm
-ds_wm=hrm.calculate_ds_wm(xmlfile='T001.xml')
+ds_wm=hrm.calculate_ds_wm(xmlfile='T001_wm.xml')
 ```
 
 ### Example of usage - to create a xarray dataset from HR Wallingford capacitance csv wave gauge files
@@ -35,13 +35,13 @@ ds_cwg=wg.calculate_ds_cwg(cwgfile='T001_cwg.csv')
 ### Example of usage - to create a xarray dataset from DHI resistance dfs0 wave gauge files
 ```
 from qghl_raw2xarray import wave_gauges as wg
-ds_rwg=wg.calculate_ds_rwg(rwgfile='T001.dfs0')
+ds_rwg=wg.calculate_ds_rwg(rwgfile='T001_rwg.dfs0')
 ```
 
 ### Example of usage - to create a xarray dataset from Vectrino ADV binary vno files
 ```
 from qghl_raw2xarray import vectrino as vec
-vec.calculate_ds_vec(vecfile='T001.vno')
+vec.calculate_ds_vec(vecfile='T001_vno.vno')
 ```
 
 ### Example of usage - to create a xarray dataset from Flowtracker ADV and pressure sensor csv files 
