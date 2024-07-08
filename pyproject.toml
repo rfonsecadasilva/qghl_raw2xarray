@@ -23,5 +23,6 @@ dependencies = [
   "matplotlib",
   "mikeio",
   "pandas",
+  "scipy==1.11.4",
   "xarray",  
 ]
