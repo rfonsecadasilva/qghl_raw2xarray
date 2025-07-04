@@ -92,6 +92,11 @@ def calculate_ds_rwg(rwgfile, rwgpath='./', tmin=None, start_time=None, **kwargs
     except FileNotFoundError as e:
         raise FileNotFoundError(
             f"The specified file {rwgpath+rwgfile} was not found.") from e
+    if "CH11 Volt Trig" in rwgts.to_xarray().data_vars:
+        time_index_peak_voltage = rwgts["CH11 Volt Trig"].to_xarray().differentiate("time").argmax().item()
+        print(f"Peak voltage found at time index {time_index_peak_voltage} ")
+    else:
+        time_index_peak_voltage = 0
     rwg_data = np.array(
         [rwgts[i].values for i in rwgts.to_xarray().data_vars if i != "CH11 Volt Trig"])
     data_vars = {"Watlev": (("station", "time"), rwg_data,
@@ -103,7 +108,7 @@ def calculate_ds_rwg(rwgfile, rwgpath='./', tmin=None, start_time=None, **kwargs
         # calculate tmin from XML file
         tmin = calculate_tmin_rwgxml(rwgfile, rwgpath)
     # convert time axis to datetime64 from tmin
-    time_axis = tmin + (time_axis - time_axis[0])
+    time_axis = tmin + (time_axis - time_axis[time_index_peak_voltage])
     coords = {"time": time_axis}
     # create xarray
     ds = xr.Dataset(data_vars=data_vars,
