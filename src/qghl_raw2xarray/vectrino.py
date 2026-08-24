@@ -4,6 +4,7 @@ This module provides functions for reading and processing Vectrino point ADV dat
 import datetime
 import os
 import re
+from pathlib import Path
 import dolfyn
 import numpy as np
 import xarray as xr
@@ -66,7 +67,9 @@ def vec2ds_dolfyn(vecfile, vecpath):
     ds (xarray.Dataset): Xarray dataset containing the Vectrino data.
     """
     print(f"Reading Vectrino vno file {vecfile}")
-    ds = dolfyn.read(f"{vecpath}{vecfile}")
+    vec_file_path = Path(vecpath) / vecfile
+    # dolfyn currently expects a string-like filename in its internal parsing.
+    ds = dolfyn.read(str(vec_file_path))
     return ds
 
 
@@ -87,8 +90,9 @@ def vec2ds(vecfile, vecpath):
     """
     def str_to_nptime(x):
         return datetime.datetime.strptime(x, "%d/%m/%Y %I:%M:%S %p")
+    vec_dir = Path(vecpath)
     ds = []  # initialize list with xarray datasets
-    hdrfilename = f'{vecpath}{vecfile}.hdr'
+    hdrfilename = vec_dir / f"{vecfile}.hdr"
     print(f"Reading Vectrino file {hdrfilename}")
     try:
         hdrfile = open(hdrfilename, "r", encoding="utf-8").readlines()
@@ -103,15 +107,15 @@ def vec2ds(vecfile, vecpath):
                      for j in hdrfile if "Sampling rate" in j][0]
     dt = datetime.timedelta(seconds=1/float(sampling_rate))
     # pck file
-    pck_file = f'{vecpath}{vecfile}.pck'
-    if pck_file in os.getcwd():
-        ds.append(vec_pck_reader(pck_file, vecpath, hdrfile, nbeams))
+    pck_path = vec_dir / f"{vecfile}.pck"
+    if pck_path.exists():
+        ds.append(vec_pck_reader(pck_path.name, vec_dir, hdrfile, nbeams))
     # dat file
-    dat_file = [j for j in os.listdir(f'{vecpath}') if
-                hdrfilename.split("/")[-1].split(".")[0] in j
+    dat_file = [j for j in os.listdir(vec_dir) if
+                hdrfilename.stem in j
                 and j.split(".")[-1] in ["dat"]
                 ][0]
-    dat_file = f'{vecpath}{dat_file}'
+    dat_file = vec_dir / dat_file
     ds.append(vec_dat_reader(dat_file, hdrfile, nbeams))
     ds = xr.merge(ds)
     time = np.arange(str_to_nptime(tini_str), str_to_nptime(
@@ -147,9 +151,10 @@ def vec_pck_reader(pck_file, vecpath, hdrfile, nbeams):
 
     """
     print("read pck file")
-    pckf = open(f'{vecpath}{pck_file}', "r", encoding="utf-8").readlines()
+    pck_path = Path(vecpath) / pck_file
+    pckf = open(pck_path, "r", encoding="utf-8").readlines()
     counter = np.arange(
-        1, len(open(f'{vecpath}{pck_file}', "r", encoding="utf-8").readlines())//2+1)
+        1, len(open(pck_path, "r", encoding="utf-8").readlines())//2+1)
     # line with info on data variables and units
     idx = [k+1 for k, j in enumerate(hdrfile) if pck_file in j][0]
     pck_var = [re.split(r'\s{2,}', hdrfile[j].strip())[1].split()[
@@ -203,10 +208,11 @@ def vec_dat_reader(datfile, hdrfile, nbeams):
 
     """
     print("read dat file")
-    datf = open(datfile, "r", encoding="utf-8").readlines()
+    dat_path = Path(datfile)
+    datf = open(dat_path, "r", encoding="utf-8").readlines()
     # line with info on data variables and units
     idx = [k+1 for k, j in enumerate(hdrfile)
-           if datfile.split("/")[-1] in j][0]
+            if dat_path.name in j][0]
     dat_var = [
         re.split(
             r'\s{2,}', hdrfile[j].strip()
