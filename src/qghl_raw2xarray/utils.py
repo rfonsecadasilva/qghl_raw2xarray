@@ -49,7 +49,11 @@ def time_offset(ds, start_time=None):
             "Relative to first time value of experiment")
     else:
         ds = ds.assign_coords(
-            {"time_offset": ("time", (ds.time.values-start_time).astype(float)/1e9)})
+            time_offset=(
+                "time",
+                ((ds.time.values - start_time) / np.timedelta64(1, "s")).astype(np.float64),
+            )
+        )
         ds.time_offset.attrs = set_time_attrs(
             "Relative to start time of experiment")
     return ds
