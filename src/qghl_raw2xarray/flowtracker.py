@@ -4,6 +4,7 @@ pressure sensor data.
 """
 import datetime
 import json
+from pathlib import Path
 import numpy as np
 import xarray as xr
 from qghl_raw2xarray.utils import set_station_coords, set_time_coords
@@ -61,19 +62,22 @@ def ftcsv2ds(ftfile, ftpath):
     """
     def str_to_nptime(x):
         return datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')
+    ft_dir = Path(ftpath)
+    ft_csv_path = ft_dir / ftfile
+    ft_cfg_path = ft_dir / f"{ftfile[:-4]}.labadv_config"
     try:
-        csvfile = open(f"{ftpath}{ftfile}", "r",
+        csvfile = open(ft_csv_path, "r",
                        encoding="utf-8").readlines()
     except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"The specified file {ftpath}{ftfile} was not found.") from e
+            f"The specified file {ft_csv_path} was not found.") from e
     print("Reading Flowtracker csv file", ftfile)
     try:
-        cfgfile = open(f"{ftpath}{ftfile[:-4]}.labadv_config",
+        cfgfile = open(ft_cfg_path,
                        "r", encoding="utf-8").read()
     except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"The specified file {ftpath}{ftfile[:-4]}.labadv_config was not found.") from e
+            f"The specified file {ft_cfg_path} was not found.") from e
     nbeams = len(
         [i for i in csvfile[0].strip().split(",") if "Correlation" in i])
     utc_time = np.array([str_to_nptime(i.strip().split(",")[1])
