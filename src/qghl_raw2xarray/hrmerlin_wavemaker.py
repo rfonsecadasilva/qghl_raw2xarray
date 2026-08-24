@@ -5,6 +5,7 @@ import datetime
 import os
 import struct
 import xml.etree.ElementTree as ET
+from pathlib import Path
 import numpy as np
 import xarray as xr
 from qghl_raw2xarray.utils import set_paddle_coords, set_time_coords
@@ -29,12 +30,14 @@ def calculate_ds_wm(xmlfile, xmlfilepath='./', tmin=None, start_time=None, **kwa
     FileNotFoundError: If the xml file or binary files are not found.
 
     """
+    xml_dir = Path(xmlfilepath)
+    xml_path = xml_dir / xmlfile
     # parse HR Merlin xml file
     try:
-        xml_tree = ET.parse(xmlfilepath+xmlfile)
+        xml_tree = ET.parse(xml_path)
     except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"The specified file {xmlfilepath+xmlfile} was not found."
+            f"The specified file {xml_path} was not found."
             ) from e
     xml_root = xml_tree.getroot()
     # extract metadata from XML
@@ -47,12 +50,12 @@ def calculate_ds_wm(xmlfile, xmlfilepath='./', tmin=None, start_time=None, **kwa
     list_variables = [i.split("(")[0][:-1] for i in list_channels]
     list_units = [i.split("(")[1].split(")")[0] for i in list_channels]
     # list of bin files
-    list_filename = [f for f in os.listdir(xmlfilepath) if f.startswith(xmlfile.split(
+    list_filename = [f for f in os.listdir(xml_dir) if f.startswith(xmlfile.split(
         ".")[0]) and f.endswith(".bin")]  # list with bin files, one for each paddle
     data = []  # initialize list with numpy array, one for each paddle
     for filename in list_filename:
         print(f"Reading HR Merlin wave maker file {filename}")
-        data.append(read_binary_file(filename, xmlfilepath, pnts, chans))
+        data.append(read_binary_file(filename, xml_dir, pnts, chans))
     data = np.concatenate([np.expand_dims(i, axis=0) for i in data], axis=0)
     # create xarray data_vars and coords
     data_vars = {list_variables[d]: (("paddle", "time"), data[:, d, :],
@@ -79,7 +82,7 @@ def calculate_ds_wm(xmlfile, xmlfilepath='./', tmin=None, start_time=None, **kwa
     if "attrs_run" in kwargs:
         ds.attrs = kwargs["attrs_run"]
     ds.attrs["Description"] = "HR Merlin wave gauge data at wave maker"
-    ds.attrs["Raw files path"] = xmlfilepath
+    ds.attrs["Raw files path"] = str(xml_dir)
     ds.attrs["Raw files"] = list_filename
     ds.attrs["Xarray dataset date"] = str(
         np.datetime64(datetime.datetime.now().isoformat()))
@@ -99,7 +102,8 @@ def read_binary_file(filename, xmlfilepath, pnts, chans):
     Returns:
     np.ndarray: The unpacked data from the binary file.
     """
-    with open(xmlfilepath + filename, 'rb') as file:
+    file_path = Path(xmlfilepath) / filename
+    with open(file_path, 'rb') as file:
         binary_data = file.read()
     data_format = '<' + str(len(binary_data) // 4) + \
         'f'  # Little-endian, float32
