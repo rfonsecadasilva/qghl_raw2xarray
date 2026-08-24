@@ -2,6 +2,7 @@
 This module provides functions for reading and processing wave gauge data.
 """
 import datetime
+from pathlib import Path
 import mikeio
 import numpy as np
 import pandas as pd
@@ -29,12 +30,13 @@ def calculate_ds_cwg(cwgfile, cwgpath='./', tmin=None, start_time=None, wg_dt=0.
 
     """
     print("Reading capacitance wave gauge file", cwgfile)
+    cwg_file_path = Path(cwgpath) / cwgfile
     try:
-        cwgts = pd.read_csv(cwgpath+cwgfile, header=None,
+        cwgts = pd.read_csv(cwg_file_path, header=None,
                             index_col=None, usecols=range(8))
     except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"The specified file {cwgpath+cwgfile} was not found.") from e
+            f"The specified file {cwg_file_path} was not found.") from e
     cwgts.columns = [f"C{i+1:1d}" for i in cwgts.columns]
     # create data_vars
     data_vars = {"Watlev": (("station", "time"), cwgts.values.transpose(),
@@ -62,7 +64,7 @@ def calculate_ds_cwg(cwgfile, cwgpath='./', tmin=None, start_time=None, wg_dt=0.
     if "wg_comment" in kwargs:
         ds.attrs["Gauge position"] = kwargs["wg_comment"]
     ds.attrs["Description"] = "HR Wallingford capacitance wave gauge data"
-    ds.attrs["Raw files path"] = cwgpath
+    ds.attrs["Raw files path"] = str(Path(cwgpath))
     ds.attrs["Raw files"] = [cwgfile]
     ds.attrs["Xarray dataset date"] = str(
         np.datetime64(datetime.datetime.now().isoformat()))
@@ -87,11 +89,12 @@ def calculate_ds_rwg(rwgfile, rwgpath='./', tmin=None, start_time=None, **kwargs
     FileNotFoundError: If the specified file is not found.
     """
     print("Reading resistance wave gauge file", rwgfile)
+    rwg_file_path = Path(rwgpath) / rwgfile
     try:
-        rwgts = mikeio.read(rwgpath+rwgfile)
+        rwgts = mikeio.read(rwg_file_path)
     except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"The specified file {rwgpath+rwgfile} was not found.") from e
+            f"The specified file {rwg_file_path} was not found.") from e
     if "CH11 Volt Trig" in rwgts.to_xarray().data_vars:
         time_index_peak_voltage = rwgts["CH11 Volt Trig"].to_xarray().differentiate("time").argmax().item()
         print(f"Peak voltage found at time index {time_index_peak_voltage} ")
@@ -124,7 +127,7 @@ def calculate_ds_rwg(rwgfile, rwgpath='./', tmin=None, start_time=None, **kwargs
     if "wg_comment" in kwargs:
         ds.attrs["Gauge position"] = kwargs["wg_comment"]
     ds.attrs["Description"] = "DHI resistance wave gauge data"
-    ds.attrs["Raw files path"] = rwgpath
+    ds.attrs["Raw files path"] = str(Path(rwgpath))
     ds.attrs["Raw files"] = [rwgfile]
     ds.attrs["Xarray dataset date"] = str(
         np.datetime64(datetime.datetime.now().isoformat()))
@@ -144,11 +147,13 @@ def calculate_tmin_rwgxml(rwgfile, rwgpath):
     Raises:
     FileNotFoundError: If the specified file is not found.
     """
+    rwg_dir = Path(rwgpath)
+    rwg_xml_path = rwg_dir / f"{rwgfile[:-5]}.xml"
     try:
-        xml_file = open(f"{rwgpath}{rwgfile[:-5]}.xml", "r", encoding="utf-8").read()
+        xml_file = open(rwg_xml_path, "r", encoding="utf-8").read()
     except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"The specified file {rwgpath+rwgfile[:-5]}.xml was not found.") from e
+            f"The specified file {rwg_xml_path} was not found.") from e
     rwg_tmax_str = xml_file.split("<date>")[1].split("</date>")[0]
     rwg_tmax = np.datetime64(rwg_tmax_str)
     rwg_tmax += np.timedelta64(int(rwg_tmax_str[-5:-3]), 'h') + \
